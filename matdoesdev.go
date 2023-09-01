@@ -15,7 +15,7 @@ func init() {
 }
 
 type MatchRandomPaths struct {
-	Chance string `json:"chance,omitempty"`
+	Chance float64 `json:"chance,omitempty"`
 }
 
 // CaddyModule returns the Caddy module information.
@@ -33,17 +33,18 @@ func hash(s string) uint32 {
 }
 
 func (m MatchRandomPaths) Match(r *http.Request) bool {
-	chance, err := strconv.ParseFloat(m.Chance, 64)
-	if err != nil {
-		return false
-	}
-
-	return hash(r.URL.Path) < uint32(chance*4294967295)
+	return hash(r.URL.Path) < uint32(m.Chance*4294967295)
 }
 
 func (m *MatchRandomPaths) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
-	if !d.Args(&m.Chance) {
-		return d.ArgErr()
+	for d.Next() {
+		if d.NextArg() {
+			chance, err := strconv.ParseFloat(d.Val(), 64)
+			if err != nil {
+				return err
+			}
+			m.Chance = chance
+		}
 	}
 	return nil
 }
