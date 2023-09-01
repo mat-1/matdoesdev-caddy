@@ -15,7 +15,7 @@ func init() {
 }
 
 type MatchRandomPaths struct {
-	Chance string `json:"string,omitempty"`
+	Chance string `json:"chance,omitempty"`
 }
 
 // CaddyModule returns the Caddy module information.
@@ -42,10 +42,8 @@ func (m MatchRandomPaths) Match(r *http.Request) bool {
 }
 
 func (m *MatchRandomPaths) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
-	for d.Next() {
-		if !d.Args(&m.Chance) {
-			return d.ArgErr()
-		}
+	if !d.Args(&m.Chance) {
+		return d.ArgErr()
 	}
 	return nil
 }
