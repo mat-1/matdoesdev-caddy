@@ -15,7 +15,7 @@ func init() {
 }
 
 type MatchRandomPaths struct {
-	Chance string `json:"number,omitempty"`
+	Chance string `json:"string,omitempty"`
 }
 
 // CaddyModule returns the Caddy module information.
