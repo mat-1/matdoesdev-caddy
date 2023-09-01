@@ -33,7 +33,7 @@ func hash(s string) uint32 {
 }
 
 func (m MatchRandomPaths) Match(r *http.Request) bool {
-	return hash(r.URL.Path) < uint32(m.Chance*4294967295)
+	return (float64(hash(r.URL.Path)))/4294967295.0 < m.Chance
 }
 
 func (m *MatchRandomPaths) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
