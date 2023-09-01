@@ -1,7 +1,7 @@
 package matdoesdev
 
 import (
-	"hash/fnv"
+	"crypto/sha1"
 	"net/http"
 	"strconv"
 
@@ -27,9 +27,10 @@ func (MatchRandomPaths) CaddyModule() caddy.ModuleInfo {
 }
 
 func hash(s string) uint32 {
-	h := fnv.New32a()
+	h := sha1.New()
 	h.Write([]byte(s))
-	return h.Sum32()
+	buf := h.Sum(nil)
+	return uint32(buf[0])<<24 | uint32(buf[1])<<16 | uint32(buf[2])<<8 | uint32(buf[3])
 }
 
 func (m MatchRandomPaths) Match(r *http.Request) bool {
