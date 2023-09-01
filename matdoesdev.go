@@ -3,9 +3,10 @@ package matdoesdev
 import (
 	"hash/fnv"
 	"net/http"
+	"strconv"
 
-	"github.com/caddyserver/caddy/caddyfile"
 	"github.com/caddyserver/caddy/v2"
+	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 )
 
@@ -14,7 +15,7 @@ func init() {
 }
 
 type MatchRandomPaths struct {
-	Chance float32 `json:"number,omitempty"`
+	Chance string `json:"number,omitempty"`
 }
 
 // CaddyModule returns the Caddy module information.
@@ -32,18 +33,18 @@ func hash(s string) uint32 {
 }
 
 func (m MatchRandomPaths) Match(r *http.Request) bool {
-	return hash(r.URL.Path) < uint32(m.Chance*4294967295)
+	chance, err := strconv.ParseFloat(m.Chance, 64)
+	if err != nil {
+		return false
+	}
+
+	return hash(r.URL.Path) < uint32(chance*4294967295)
 }
 
 func (m *MatchRandomPaths) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	for d.Next() {
-		for d.Next() {
-			if !d.Args(&m.Chance) {
-				return d.ArgErr()
-			}
-		}
-		if d.NextBlock(0) {
-			return d.Err("malformed random_paths matcher: blocks are not supported")
+		if !d.Args(&m.Chance) {
+			return d.ArgErr()
 		}
 	}
 	return nil
@@ -51,4 +52,5 @@ func (m *MatchRandomPaths) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 
 var (
 	_ caddyhttp.RequestMatcher = (*MatchRandomPaths)(nil)
+	_ caddyfile.Unmarshaler    = (*MatchRandomPaths)(nil)
 )
